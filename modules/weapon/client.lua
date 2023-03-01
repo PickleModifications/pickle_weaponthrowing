@@ -25,9 +25,11 @@ end
 function ThrowCurrentWeapon()
     if throwingWeapon then return end
     local ped = PlayerPedId()
+    local vehicle = GetVehiclePedIsIn(ped, false)
     local equipped, weaponHash = GetCurrentPedWeapon(ped, 1)
     local weapon = GetWeaponString(weaponHash)
     if not equipped or not weapon then return end
+    if IsPedInVehicle(ped, vehicle, true) then return end
     throwingWeapon = true
     CreateThread(function()
         PlayAnim(ped, "melee@thrown@streamed_core", "plyr_takedown_front", -8.0, 8.0, -1, 49)
