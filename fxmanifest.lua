@@ -3,7 +3,7 @@ lua54 'yes'
 game 'gta5'
 
 name         'pickle_weaponthrowing'
-version      '1.0.0'
+version      '1.1.0'
 description  'A multi-framework weapon throwing script.'
 author       'Pickle Mods'
 

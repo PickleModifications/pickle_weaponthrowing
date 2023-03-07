@@ -66,7 +66,7 @@ function OnPlayerDeath()
     TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop)})
 end
 
-RegisterCommand("weaponThrow", function()
+RegisterCommand("throwGun", function()
     local ped = PlayerPedId()
     local equipped, weaponHash = GetCurrentPedWeapon(ped, 1)
     local weapon = GetWeaponString(weaponHash)
@@ -74,14 +74,15 @@ RegisterCommand("weaponThrow", function()
     ThrowCurrentWeapon()
 end)
 
-RegisterKeyMapping('weaponThrow', 'Throw Weapon', 'keyboard', Config.ThrowKeybind)
+RegisterKeyMapping('throwGun', 'Throw Weapon', 'keyboard', 'e')
 
 RegisterNetEvent("pickle_weaponthrowing:setWeaponData", function(weaponID, data)
     ThrownWeapons[weaponID] = data
 end)
 
 AddEventHandler('gameEventTriggered', function(event, args)
-    if not event == "CEventPlayerDeath" or NetworkGetPlayerIndexFromPed(args[1]) ~= PlayerId() then return end
+    if event ~= "CEventNetworkEntityDamage" or GetEntityType(args[1]) ~= 1 or NetworkGetPlayerIndexFromPed(args[1]) ~= PlayerId() then return end
+    if not IsEntityDead(PlayerPedId()) then return end
     OnPlayerDeath()
 end)
 

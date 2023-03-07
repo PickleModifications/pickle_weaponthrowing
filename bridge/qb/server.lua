@@ -15,6 +15,7 @@ function ShowNotification(target, text)
 end
 
 function GetWeapon(source, name)
+    if Inventory.GetWeapon then return Inventory.GetWeapon(source, name) end
     local xPlayer = QBCore.Functions.GetPlayer(source)
     local item = xPlayer.Functions.GetItemByName(name)
     if item ~= nil then 
@@ -24,12 +25,19 @@ function GetWeapon(source, name)
     end
 end
 
-function AddWeapon(source, name) 
+function AddWeapon(source, data) 
+    if Inventory.AddWeapon then return Inventory.AddWeapon(source, data) end
     local xPlayer = QBCore.Functions.GetPlayer(source)
-    return xPlayer.Functions.AddItem(name, 1)
+    return xPlayer.Functions.AddItem(data.weapon, 1)
 end
 
-function RemoveWeapon(source, name) 
+function RemoveWeapon(source, data) 
+    if Inventory.RemoveWeapon then return Inventory.RemoveWeapon(source, data) end
     local xPlayer = QBCore.Functions.GetPlayer(source)
-    return xPlayer.Functions.RemoveItem(name, 1)
+    return xPlayer.Functions.RemoveItem(data.weapon, 1)
+end
+
+function CreateWeaponData(source, data, weaponData)
+    if Inventory.CreateWeaponData then return Inventory.CreateWeaponData(source, data, weaponData) end
+    return data
 end
