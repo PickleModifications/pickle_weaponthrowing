@@ -90,7 +90,7 @@ CreateThread(function()
     while true do
         local wait = 1000
         local ped = PlayerPedId()
-        if not IsPlayerDead(ped) then 
+        if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then 
             for k,v in pairs(ThrownWeapons) do 
                 if NetworkDoesNetworkIdExist(v.net_id) then 
                     local entity = NetToObj(v.net_id)
