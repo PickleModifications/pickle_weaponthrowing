@@ -74,7 +74,7 @@ RegisterCommand("throwGun", function()
     ThrowCurrentWeapon()
 end)
 
-RegisterKeyMapping('throwGun', 'Throw Weapon', 'keyboard', 'e')
+RegisterKeyMapping('throwGun', 'Throw Weapon', 'keyboard', Config.ThrowKeybind)
 
 RegisterNetEvent("pickle_weaponthrowing:setWeaponData", function(weaponID, data)
     ThrownWeapons[weaponID] = data
