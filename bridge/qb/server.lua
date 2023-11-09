@@ -34,7 +34,7 @@ end
 function RemoveWeapon(source, data) 
     if Inventory.RemoveWeapon then return Inventory.RemoveWeapon(source, data) end
     local xPlayer = QBCore.Functions.GetPlayer(source)
-    return xPlayer.Functions.RemoveItem(data.weapon, 1)
+    return xPlayer.Functions.RemoveItem(string.lower(data.weapon), 1)
 end
 
 function CreateWeaponData(source, data, weaponData)
