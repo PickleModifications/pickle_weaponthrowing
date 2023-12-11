@@ -63,14 +63,13 @@ elseif GetResourceState('qb-inventory') == 'started' then
     end)	
 	
 elseif GetResourceState('qs-inventory') == 'started' then
-    Inventory.PlayerWeapons = {}
 
     Inventory.GetWeapon = function(source, name)
-		local data = Inventory.PlayerWeapons[source]
-		
+		local data = exports['qs-inventory']:GetCurrentWeapon(source)	
         if data then								
 			local item = exports['qs-inventory']:GetItemBySlot(source, data.slot)
 			if item and item.name:lower() == name:lower() then
+				exports['qs-inventory']:useItemSlot(source, item)
 				return 1, item
 			end	
         end
@@ -91,10 +90,5 @@ elseif GetResourceState('qs-inventory') == 'started' then
         end
         return data
     end	
-	
-    RegisterNetEvent('pickle_weaponthrowing:SetCurrentWeapon', function(weaponData)
-        local source = source
-        Inventory.PlayerWeapons[source] = weaponData
-    end)
-	
+
 end
