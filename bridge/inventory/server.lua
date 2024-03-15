@@ -28,7 +28,8 @@ if GetResourceState('ox_inventory') == 'started' then
     end
 
     Inventory.AddWeapon = function(source, data)
-        exports.ox_inventory:AddItem(source, data.weapon, 1, data.metadata, data.slot)
+        -- Assuming 'data.metadata' contains the weapon's ammo count
+        exports.ox_inventory:AddItem(source, data.weapon, 1, data.metadata)
     end
 
     Inventory.RemoveWeapon = function(source, data)
