@@ -24,30 +24,75 @@ end
 
 function ThrowCurrentWeapon()
     if throwingWeapon then return end
+    
     local ped = PlayerPedId()
     local equipped, weaponHash = GetCurrentPedWeapon(ped, 1)
     local weapon = GetWeaponString(weaponHash)
     if not equipped or not weapon then return end
+    
+    local ammoCount = GetAmmoInPedWeapon(ped, weaponHash)
     throwingWeapon = true
+    
     CreateThread(function()
         PlayAnim(ped, "melee@thrown@streamed_core", "plyr_takedown_front", -8.0, 8.0, -1, 49)
         Wait(600)
         ClearPedTasks(ped)
     end)
+    
     Wait(550)
+    
     local coords = GetOffsetFromEntityInWorldCoords(ped, 0.0, 0.0, 1.0)
     local prop = GetWeaponObjectFromPed(ped, true)
     local model = GetEntityModel(prop)
+    
     RemoveWeaponFromPed(ped, weaponHash)
     SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
     DeleteEntity(prop)
+    
     prop = CreateProp(model, coords.x, coords.y, coords.z, true, false, true)
     SetEntityCoords(prop, coords.x, coords.y, coords.z)
     SetEntityHeading(prop, GetEntityHeading(ped) + 90.0)
     PerformPhysics(prop)
-    TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop)})
+    
+    -- Add interaction to the thrown weapon
+    exports.interact:AddEntityInteraction({
+        netId = ObjToNet(prop),
+        id = 'throwWeaponInteraction_' .. ObjToNet(prop), -- Unique ID for removing interactions
+        distance = 4.0, -- Optional interaction distance
+        interactDst = 3.0, -- Optional interaction trigger distance
+        ignoreLos = true, -- Optional ignore line of sight
+        options = {
+            {
+                label = 'Plukk opp',
+                action = function(entity, coords, args)
+                    local ped = PlayerPedId()
+                    if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then
+                        for k, v in pairs(ThrownWeapons) do
+                            if NetworkDoesNetworkIdExist(v.net_id) then
+                                local entity = NetToObj(v.net_id)
+                                ClearPedTasksImmediately(ped)
+                                FreezeEntityPosition(ped, true)
+                                PlayAnim(ped, "pickup_object", "pickup_low", -8.0, 8.0, -1, 49, 1.0)
+                                Wait(800)
+                                TriggerServerEvent("pickle_weaponthrowing:pickupWeapon", k)
+                                Wait(800)
+                                ClearPedTasks(ped)
+                                FreezeEntityPosition(ped, false)
+                            end
+                        end
+                    end
+                end,
+            },
+        },
+    })
+    
+    TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop), ammo = ammoCount}) -- Include ammo count
     throwingWeapon = nil
 end
+
+RegisterNetEvent("pickle_weaponthrowing:removeInteraction", function(netId)
+    exports.interact:RemoveEntityInteraction('throwWeaponInteraction_' .. netId)
+end)
 
 function OnPlayerDeath()
     if not Config.DeathDropsWeapon then return end
