@@ -53,38 +53,40 @@ function ThrowCurrentWeapon()
     SetEntityCoords(prop, coords.x, coords.y, coords.z)
     SetEntityHeading(prop, GetEntityHeading(ped) + 90.0)
     PerformPhysics(prop)
-    
+
+    if Config.interact then
     -- Add interaction to the thrown weapon
-    exports.interact:AddEntityInteraction({
-        netId = ObjToNet(prop),
-        id = 'throwWeaponInteraction_' .. ObjToNet(prop), -- Unique ID for removing interactions
-        distance = 4.0, -- Optional interaction distance
-        interactDst = 3.0, -- Optional interaction trigger distance
-        ignoreLos = true, -- Optional ignore line of sight
-        options = {
-            {
-                label = 'Plukk opp',
-                action = function(entity, coords, args)
-                    local ped = PlayerPedId()
-                    if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then
-                        for k, v in pairs(ThrownWeapons) do
-                            if NetworkDoesNetworkIdExist(v.net_id) then
-                                local entity = NetToObj(v.net_id)
-                                ClearPedTasksImmediately(ped)
-                                FreezeEntityPosition(ped, true)
-                                PlayAnim(ped, "pickup_object", "pickup_low", -8.0, 8.0, -1, 49, 1.0)
-                                Wait(800)
-                                TriggerServerEvent("pickle_weaponthrowing:pickupWeapon", k)
-                                Wait(800)
-                                ClearPedTasks(ped)
-                                FreezeEntityPosition(ped, false)
+        exports.interact:AddEntityInteraction({
+            netId = ObjToNet(prop),
+            id = 'throwWeaponInteraction_' .. ObjToNet(prop), -- Unique ID for removing interactions
+            distance = 4.0, -- Optional interaction distance
+            interactDst = 3.0, -- Optional interaction trigger distance
+            ignoreLos = true, -- Optional ignore line of sight
+            options = {
+                {
+                    label = 'Plukk opp',
+                    action = function(entity, coords, args)
+                        local ped = PlayerPedId()
+                        if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then
+                            for k, v in pairs(ThrownWeapons) do
+                                if NetworkDoesNetworkIdExist(v.net_id) then
+                                    local entity = NetToObj(v.net_id)
+                                    ClearPedTasksImmediately(ped)
+                                    FreezeEntityPosition(ped, true)
+                                    PlayAnim(ped, "pickup_object", "pickup_low", -8.0, 8.0, -1, 49, 1.0)
+                                    Wait(800)
+                                    TriggerServerEvent("pickle_weaponthrowing:pickupWeapon", k)
+                                    Wait(800)
+                                    ClearPedTasks(ped)
+                                    FreezeEntityPosition(ped, false)
+                                end
                             end
                         end
-                    end
-                end,
+                    end,
+                },
             },
-        },
-    })
+        })
+    end
     
     TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop), ammo = ammoCount}) -- Include ammo count
     throwingWeapon = nil
@@ -133,32 +135,34 @@ AddEventHandler('gameEventTriggered', function(event, args)
     OnPlayerDeath()
 end)
 
-CreateThread(function()
-    while true do
-        local wait = 1000
-        local ped = PlayerPedId()
-        if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then 
-            for k,v in pairs(ThrownWeapons) do 
-                if NetworkDoesNetworkIdExist(v.net_id) then 
-                    local entity = NetToObj(v.net_id)
-                    local coords = GetEntityCoords(entity)
-                    local dist = #(GetEntityCoords(ped) - coords)
-                    if dist < 5.0 then 
-                        wait = 0
-                        if dist < 1.25 and not ShowInteractText(_L("pickup_weapon")) and IsControlJustPressed(1, 51) then 
-                            ClearPedTasksImmediately(ped)
-                            FreezeEntityPosition(ped, true)
-                            PlayAnim(ped, "pickup_object", "pickup_low", -8.0, 8.0, -1, 49, 1.0)
-                            Wait(800)
-                            TriggerServerEvent("pickle_weaponthrowing:pickupWeapon", k)
-                            Wait(800)
-                            ClearPedTasks(ped)
-                            FreezeEntityPosition(ped, false)
+if not Config.interact then
+    CreateThread(function()
+        while true do
+            local wait = 1000
+            local ped = PlayerPedId()
+            if not IsPlayerDead(ped) and not IsPedInAnyVehicle(ped, true) then 
+                for k,v in pairs(ThrownWeapons) do 
+                    if NetworkDoesNetworkIdExist(v.net_id) then 
+                        local entity = NetToObj(v.net_id)
+                        local coords = GetEntityCoords(entity)
+                        local dist = #(GetEntityCoords(ped) - coords)
+                        if dist < 5.0 then 
+                            wait = 0
+                            if dist < 1.25 and not ShowInteractText(_L("pickup_weapon")) and IsControlJustPressed(1, 51) then 
+                                ClearPedTasksImmediately(ped)
+                                FreezeEntityPosition(ped, true)
+                                PlayAnim(ped, "pickup_object", "pickup_low", -8.0, 8.0, -1, 49, 1.0)
+                                Wait(800)
+                                TriggerServerEvent("pickle_weaponthrowing:pickupWeapon", k)
+                                Wait(800)
+                                ClearPedTasks(ped)
+                                FreezeEntityPosition(ped, false)
+                            end
                         end
                     end
-                end
-            end 
+                end 
+            end
+            Wait(wait)
         end
-        Wait(wait)
-    end
-end)
+    end)
+end
