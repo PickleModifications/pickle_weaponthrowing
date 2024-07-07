@@ -8,7 +8,7 @@ Config.DeathDropsWeapon = true -- Drops your current weapon upon death.
 
 Config.ThrowKeybind = "e"
 
-Config.UseInteract = true
+Config.interact = true
 
 Config.Weapons = { -- Any weapon in this list is throwable.
     "WEAPON_DAGGER",
