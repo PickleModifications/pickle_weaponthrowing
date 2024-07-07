@@ -17,7 +17,12 @@ RegisterNetEvent("pickle_weaponthrowing:pickupWeapon", function(weaponID)
     local source = source
     if not ThrownWeapons[weaponID] then return end
     local entity = NetworkGetEntityFromNetworkId(ThrownWeapons[weaponID].net_id)
+    
+    -- Trigger client event to remove the interaction
+    TriggerClientEvent("pickle_weaponthrowing:removeInteraction", -1, ThrownWeapons[weaponID].net_id)
+    
     DeleteEntity(entity)
+    -- Ensure AddWeapon now accounts for the ammo count
     AddWeapon(source, ThrownWeapons[weaponID])
     ThrownWeapons[weaponID] = nil
     TriggerClientEvent("pickle_weaponthrowing:setWeaponData", -1, weaponID, nil)
