@@ -104,4 +104,49 @@ elseif GetResourceState('qs-inventory') == 'started' then
         end
         return data
     end
+elseif GetResourceState('core_inventory') == 'started' then
+    Inventory.PlayerWeapons = {}
+
+    Inventory.GetWeapon = function(source, name)
+        local data = Inventory.PlayerWeapons[source]
+        if data then
+             return 1, data
+        else
+            return 0
+        end
+    end
+
+    Inventory.CreateWeaponData = function(source, data, weaponData)
+        for k,v in pairs(weaponData) do
+            data[k] = v
+        end
+        return data
+    end
+
+    Inventory.AddWeapon = function(source, data)
+        local result = exports.core_inventory:addItem(source, data.name, 1, data.metadata, 'content')
+        if result then
+            TriggerClientEvent('core_inventory:client:notification', source, data.name, 'add', 1)
+        end
+        return result
+    end
+
+    Inventory.RemoveWeapon = function(source, data)
+        local result = exports.core_inventory:removeItem(data.currentInventory, data.name, 1, nil)
+        if result then
+            TriggerClientEvent('core_inventory:client:notification', source, data.name, 'remove', 1)
+            TriggerClientEvent('core_inventory:client:inventoryCleared', source, data.currentInventory)
+        end
+        return result
+    end
+
+    RegisterNetEvent('pickle_weaponthrowing:SetCurrentWeapon', function(weaponData, weaponInventory)
+        local source = source
+        if weaponData then
+            weaponData.defaultData = weaponData
+            weaponData.currentInventory = weaponInventory
+            weaponData.weapon = weaponData.name
+        end
+        Inventory.PlayerWeapons[source] = weaponData
+    end)
 end
