@@ -28,6 +28,7 @@ function ThrowCurrentWeapon()
     local equipped, weaponHash = GetCurrentPedWeapon(ped, 1)
     local weapon = GetWeaponString(weaponHash)
     if not equipped or not weapon then return end
+    local ammoCount = GetAmmoInPedWeapon(ped, weaponHash) -- Capture ammo count
     throwingWeapon = true
     CreateThread(function()
         PlayAnim(ped, "melee@thrown@streamed_core", "plyr_takedown_front", -8.0, 8.0, -1, 49)
@@ -45,9 +46,10 @@ function ThrowCurrentWeapon()
     SetEntityCoords(prop, coords.x, coords.y, coords.z)
     SetEntityHeading(prop, GetEntityHeading(ped) + 90.0)
     PerformPhysics(prop)
-    TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop)})
+    TriggerServerEvent("pickle_weaponthrowing:throwWeapon", {weapon = weapon, net_id = ObjToNet(prop), ammo = ammoCount}) -- Include ammo count
     throwingWeapon = nil
 end
+
 
 function OnPlayerDeath()
     if not Config.DeathDropsWeapon then return end
